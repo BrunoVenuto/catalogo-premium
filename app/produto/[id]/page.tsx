@@ -3,97 +3,96 @@
 import { useParams, useRouter } from "next/navigation";
 import { products } from "@/config/products";
 import { addToCart } from "@/lib/cart";
-import CartDrawer from "@/components/CartDrawer";
-import FloatingCTA from "@/components/FloatingCTA";
-import { motion } from "framer-motion";
 
 export default function ProductPage() {
-  const params = useParams();
+  const { id } = useParams();
   const router = useRouter();
 
-  const product = products.find((p) => String(p.id) === params.id);
+  const product = products.find(
+    (p) => p.id === Number(id)
+  );
 
   if (!product) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center text-white">
         Produto não encontrado
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Botão Voltar */}
-        <button
-          onClick={() => router.back()}
-          className="mb-10 inline-flex items-center gap-2 text-neutral-300 hover:text-white transition"
-        >
-          ← Voltar
-        </button>
+    <section className="min-h-screen bg-black py-24 pb-40">
+      <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12">
+        
+        {/* IMAGEM */}
+        <img
+          src={product.image}
+          alt={product.name}
+          className="rounded-xl object-cover w-full bg-white p-6"
+        />
 
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Imagem */}
-          <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+        {/* CONTEÚDO */}
+        <div>
+          {/* VOLTAR */}
+          <button
+            onClick={() => router.back()}
+            className="text-neutral-400 hover:text-white mb-6 transition"
           >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full rounded-xl"
-            />
-          </motion.div>
+            ← Voltar
+          </button>
 
-          {/* Conteúdo */}
-          <motion.div
-            initial={{ opacity: 0, x: 60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+          {/* NOME DO PRODUTO (COR FIXA) */}
+          <h1
+            className="
+              text-3xl md:text-4xl
+              font-bold
+              text-white
+              mb-4
+            "
           >
-            <h1 className="text-3xl md:text-4xl font-bold">
-              {product.name}
-            </h1>
+            {product.name}
+          </h1>
 
-            <p className="mt-4 text-emerald-400 text-2xl font-semibold">
-              R$ {product.price}
-            </p>
+          {/* PREÇO */}
+          <p
+            className="
+              text-emerald-400
+              text-2xl md:text-3xl
+              font-bold
+              mb-6
+            "
+          >
+            R$ {Number(product.price).toFixed(2)}
+          </p>
 
-            <p className="mt-8 text-neutral-300 text-lg">
-              {product.description}
-            </p>
+          {/* DESCRIÇÃO */}
+          <p
+            className="
+              text-neutral-300
+              leading-relaxed
+              mb-10
+            "
+          >
+            {product.description}
+          </p>
 
-            <motion.button
-              onClick={() => {
-                addToCart(product);
-                alert("Produto adicionado ao orçamento");
-              }}
-              className="mt-10 bg-emerald-600 px-10 py-4 rounded-lg text-black font-semibold"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              animate={{
-                boxShadow: [
-                  "0 0 0px rgba(16,185,129,0.0)",
-                  "0 0 30px rgba(16,185,129,0.8)",
-                  "0 0 0px rgba(16,185,129,0.0)",
-                ],
-              }}
-              transition={{
-                duration: 1.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              Adicionar ao orçamento
-            </motion.button>
-          </motion.div>
+          {/* BOTÃO */}
+          <button
+            onClick={() => addToCart(product)}
+            className="
+              w-full md:w-auto
+              bg-green-600 text-black
+              px-10 py-4
+              rounded-xl
+              font-bold
+              hover:brightness-110
+              transition
+            "
+          >
+            Adicionar ao orçamento
+          </button>
         </div>
       </div>
-
-      {/* Botões globais */}
-      <CartDrawer />
-      <FloatingCTA />
-    </main>
+    </section>
   );
 }
