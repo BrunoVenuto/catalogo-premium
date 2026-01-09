@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/config/products";
 import { getCart, removeFromCart } from "@/lib/cart";
-import { generateWhatsappLink } from "@/lib/whatsapp";
 import { motion, AnimatePresence } from "framer-motion";
+import LeadModal from "./LeadModal";
 
 export default function CartDrawer() {
   const [items, setItems] = useState<Product[]>([]);
   const [open, setOpen] = useState(false);
+  const [leadOpen, setLeadOpen] = useState(false);
 
   function refresh() {
     setItems(getCart());
@@ -26,7 +27,7 @@ export default function CartDrawer() {
 
   return (
     <>
-      {/* BOTÃO FLUTUANTE DO CARRINHO */}
+      {/* BOTÃO FLUTUANTE */}
       <button
         data-cart-button
         onClick={() => setOpen(true)}
@@ -53,54 +54,41 @@ export default function CartDrawer() {
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* TOPO */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">Seu orçamento</h2>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-neutral-400 hover:text-white"
-                >
-                  ✕
-                </button>
+                <button onClick={() => setOpen(false)}>✕</button>
               </div>
 
-              {/* LISTA DE ITENS */}
               <div className="flex-1 overflow-auto space-y-4">
-                <AnimatePresence>
-                  {items.map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="flex gap-4 border-b border-white/10 pb-4"
+                {items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-4 border-b border-white/10 pb-4"
+                  >
+                    <img
+                      src={item.image}
+                      className="w-16 h-16 object-cover"
+                      alt={item.name}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-emerald-400">
+                        R$ {Number(item.price).toFixed(2)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        removeFromCart(index);
+                        refresh();
+                      }}
+                      className="text-red-400"
                     >
-                      <img
-                        src={item.image}
-                        className="w-16 h-16 object-cover"
-                        alt={item.name}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-emerald-400">
-                          R$ {Number(item.price).toFixed(2)}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          removeFromCart(index);
-                          refresh();
-                        }}
-                        className="text-red-400"
-                      >
-                        ✕
-                      </button>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
 
-              {/* TOTAL */}
               <div className="mt-6 border-t border-white/10 pt-4 flex justify-between text-lg font-semibold">
                 <span>Total:</span>
                 <span className="text-emerald-400">
@@ -108,27 +96,33 @@ export default function CartDrawer() {
                 </span>
               </div>
 
-              {/* BOTÕES */}
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={() => setOpen(false)}
-                  className="flex-1 border border-white/20 py-3 rounded-lg hover:border-white"
+                  className="flex-1 border border-white/20 py-3 rounded-lg"
                 >
                   Voltar
                 </button>
 
-                <a
-                  href={generateWhatsappLink(items)}
-                  target="_blank"
-                  className="flex-1 bg-green-600 text-black py-3 rounded-lg text-center font-semibold"
+                <button
+                  onClick={() => setLeadOpen(true)}
+                  className="flex-1 bg-green-600 text-black py-3 rounded-lg font-bold"
                 >
-                  Enviar no WhatsApp
-                </a>
+                  Enviar pedido
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MODAL DE LEAD */}
+      <LeadModal
+        open={leadOpen}
+        onClose={() => setLeadOpen(false)}
+        mode="orcamento"
+        items={items}
+      />
     </>
   );
 }

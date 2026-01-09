@@ -47,12 +47,42 @@ export default function HeroSlider() {
             {siteConfig.hero.subtitle}
           </motion.p>
 
+          {/* BOTÃO COM PULSO */}
           <motion.a
             href="#products"
             initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="inline-block mt-10 bg-yellow-400 text-black px-10 py-4 rounded-xl font-bold text-lg hover:brightness-110 transition"
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: [1, 1.08, 1],
+              boxShadow: [
+                "0 0 0px rgba(250,204,21,0.0)",
+                "0 0 35px rgba(250,204,21,0.9)",
+                "0 0 0px rgba(250,204,21,0.0)",
+              ],
+            }}
+            transition={{
+              opacity: { duration: 0.7, delay: 0.2 },
+              y: { duration: 0.7, delay: 0.2 },
+              scale: {
+                duration: 1.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+              boxShadow: {
+                duration: 1.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+            }}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.95 }}
+            className="
+              inline-block mt-10
+              bg-yellow-400 text-black
+              px-10 py-4 rounded-xl
+              font-bold text-lg
+            "
           >
             {siteConfig.hero.cta}
           </motion.a>

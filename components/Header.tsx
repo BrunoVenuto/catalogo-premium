@@ -4,13 +4,11 @@ import { siteConfig } from "@/config/site";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
+import LeadModal from "./LeadModal";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-
-  const consultoriaLink = `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(
-    siteConfig.consultoriaMessage
-  )}`;
+  const [leadOpen, setLeadOpen] = useState(false);
 
   const mobileLinkClass = `
     block w-full px-4 py-3 rounded-lg
@@ -126,13 +124,15 @@ export default function Header() {
                 </Link>
               </nav>
 
-              {/* CTA CONSULTORIA */}
+              {/* CTA CONSULTORIA (AGORA ABRE MODAL) */}
               <div className="mt-auto pt-8">
-                <a
-                  href={consultoriaLink}
-                  target="_blank"
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setLeadOpen(true);
+                  }}
                   className="
-                    block w-full text-center
+                    w-full text-center
                     bg-yellow-400 text-black
                     py-4 rounded-xl
                     font-bold text-lg
@@ -141,7 +141,7 @@ export default function Header() {
                   "
                 >
                   💬 Solicitar consultoria
-                </a>
+                </button>
               </div>
 
               {/* BOTÃO ORÇAMENTO */}
@@ -168,6 +168,13 @@ export default function Header() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MODAL DE LEAD (CONSULTORIA) */}
+      <LeadModal
+        open={leadOpen}
+        onClose={() => setLeadOpen(false)}
+        mode="consultoria"
+      />
     </>
   );
 }
