@@ -1,29 +1,20 @@
 "use client";
 
-import { siteConfig } from "@/config/site";
-import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
-import LeadModal from "./LeadModal";
+import { motion, AnimatePresence } from "framer-motion";
+import { siteConfig } from "@/config/site";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [leadOpen, setLeadOpen] = useState(false);
-
-  const mobileLinkClass = `
-    block w-full px-4 py-3 rounded-lg
-    text-white text-lg font-medium
-    transition
-    hover:bg-white/10 hover:text-yellow-400
-    active:bg-white/20
-  `;
 
   return (
     <>
+      {/* HEADER */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="sticky top-0 z-50 bg-black/80 backdrop-blur border-b border-white/10"
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -41,17 +32,17 @@ export default function Header() {
           </Link>
 
           {/* MENU DESKTOP */}
-          <nav className="hidden md:flex gap-8 text-sm text-neutral-200">
-            <Link href="/" className="hover:text-yellow-400 transition">
+          <nav className="hidden md:flex gap-8 text-sm text-neutral-300">
+            <Link href="/" className="hover:text-white transition">
               Home
             </Link>
-            <Link href="/#collections" className="hover:text-yellow-400 transition">
+            <Link href="/#collections" className="hover:text-white transition">
               Coleções
             </Link>
-            <Link href="/#products" className="hover:text-yellow-400 transition">
+            <Link href="/#products" className="hover:text-white transition">
               Produtos
             </Link>
-            <Link href="/#contact" className="hover:text-yellow-400 transition">
+            <Link href="/#contact" className="hover:text-white transition">
               Contato
             </Link>
           </nav>
@@ -71,14 +62,14 @@ export default function Header() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/70"
+            className="fixed inset-0 z-50 bg-black/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
           >
             <motion.div
-              className="absolute top-0 right-0 w-80 h-full bg-neutral-950 p-6 flex flex-col"
+              className="absolute top-0 right-0 w-72 h-full bg-neutral-950 p-6"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -108,73 +99,60 @@ export default function Header() {
                 </button>
               </div>
 
-              {/* LINKS MOBILE */}
-              <nav className="flex flex-col gap-2">
-                <Link href="/" onClick={() => setOpen(false)} className={mobileLinkClass}>
+              {/* NAV MOBILE */}
+              <nav className="flex flex-col gap-6 text-lg text-neutral-200">
+                <Link
+                  href="/"
+                  onClick={() => setOpen(false)}
+                  className="hover:text-white transition"
+                >
                   Home
                 </Link>
-                <Link href="/#collections" onClick={() => setOpen(false)} className={mobileLinkClass}>
+                <Link
+                  href="/#collections"
+                  onClick={() => setOpen(false)}
+                  className="hover:text-white transition"
+                >
                   Coleções
                 </Link>
-                <Link href="/#products" onClick={() => setOpen(false)} className={mobileLinkClass}>
+                <Link
+                  href="/#products"
+                  onClick={() => setOpen(false)}
+                  className="hover:text-white transition"
+                >
                   Produtos
                 </Link>
-                <Link href="/#contact" onClick={() => setOpen(false)} className={mobileLinkClass}>
+                <Link
+                  href="/#contact"
+                  onClick={() => setOpen(false)}
+                  className="hover:text-white transition"
+                >
                   Contato
                 </Link>
-              </nav>
 
-              {/* CTA CONSULTORIA (AGORA ABRE MODAL) */}
-              <div className="mt-auto pt-8">
+                {/* 🔥 BOTÃO CONSULTORIA (SÓ MOBILE) */}
                 <button
                   onClick={() => {
                     setOpen(false);
-                    setLeadOpen(true);
+                    document.dispatchEvent(
+                      new Event("open-consultoria")
+                    );
                   }}
                   className="
-                    w-full text-center
+                    mt-6
                     bg-yellow-400 text-black
-                    py-4 rounded-xl
-                    font-bold text-lg
-                    shadow-lg
+                    py-3 rounded-lg
+                    font-bold
                     hover:brightness-110 transition
                   "
                 >
                   💬 Solicitar consultoria
                 </button>
-              </div>
-
-              {/* BOTÃO ORÇAMENTO */}
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  const btn = document.querySelector(
-                    "button[data-cart-button]"
-                  ) as HTMLButtonElement | null;
-                  btn?.click();
-                }}
-                className="
-                  mt-4
-                  w-full
-                  bg-green-600 text-black
-                  py-4 rounded-xl
-                  font-bold text-lg
-                  hover:brightness-110 transition
-                "
-              >
-                🛒 Ver Orçamento
-              </button>
+              </nav>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* MODAL DE LEAD (CONSULTORIA) */}
-      <LeadModal
-        open={leadOpen}
-        onClose={() => setLeadOpen(false)}
-        mode="consultoria"
-      />
     </>
   );
 }

@@ -1,24 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { getCart, removeFromCart } from "@/lib/cart";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { getCart, clearCart, removeFromCart } from "@/lib/cart";
+import { siteConfig } from "@/config/site";
+import LeadModalPedido from "./LeadModalPedido";
 import { Product } from "@/config/products";
-import LeadModal from "./LeadModal";
 
 export default function CartDrawer() {
-  const [items, setItems] = useState<Product[]>([]);
   const [open, setOpen] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
-
-  function refresh() {
-    setItems(getCart());
-  }
+  const [items, setItems] = useState<Product[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    refresh();
-    window.addEventListener("focus", refresh);
-    return () => window.removeEventListener("focus", refresh);
+    function update() {
+      setItems(getCart());
+    }
+
+    update();
+    window.addEventListener("cart:update", update);
+    return () => window.removeEventListener("cart:update", update);
   }, []);
 
   const total = items.reduce(
@@ -26,77 +29,77 @@ export default function CartDrawer() {
     0
   );
 
+  function handleConfirm(name: string) {
+    const message =
+      `Olá, meu nome é ${name}.\n\n` +
+      `Gostaria de fazer o seguinte pedido:\n\n` +
+      items
+        .map(
+          (item) =>
+            `• ${item.name} — R$ ${Number(item.price).toFixed(2)}`
+        )
+        .join("\n") +
+      `\n\nTotal: R$ ${total.toFixed(2)}\n\n` +
+      `Pode me enviar a chave PIX para pagamento?`;
+
+    window.open(
+      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(
+        message
+      )}`,
+      "_blank"
+    );
+
+    clearCart();
+    setLeadOpen(false);
+    setOpen(false);
+
+    setTimeout(() => {
+      router.push("/#products");
+    }, 300);
+  }
+
+  // 👉 se carrinho esvaziar, fecha automaticamente
+  useEffect(() => {
+    if (items.length === 0) {
+      setOpen(false);
+    }
+  }, [items]);
+
   if (items.length === 0) return null;
 
   return (
     <>
-      {/* BOTÃO FLUTUANTE */}
-      <motion.button
+      {/* BOTÃO DO CARRINHO */}
+      <button
         data-cart-button
         onClick={() => setOpen(true)}
         className="
-          fixed z-50 bottom-6 right-6
-          bg-green-600 text-black
-          w-14 h-14 md:w-auto md:h-auto
-          md:px-6 md:py-4
-          rounded-full md:rounded-full
-          font-bold shadow-2xl
-          flex items-center justify-center gap-2
+          fixed bottom-6 right-6 z-50
+          bg-green-600 w-14 h-14 rounded-full
+          flex items-center justify-center
         "
-        animate={{
-          scale: [1, 1.12, 1],
-          boxShadow: [
-            "0 0 0px rgba(34,197,94,0)",
-            "0 0 35px rgba(34,197,94,0.9)",
-            "0 0 0px rgba(34,197,94,0)",
-          ],
-        }}
-        transition={{
-          duration: 1.4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        whileTap={{ scale: 0.95 }}
       >
-        {/* ÍCONE */}
-        <span className="text-2xl">🛒</span>
-
-        {/* TEXTO (SÓ DESKTOP) */}
-        <span className="hidden md:inline">
-          Orçamento ({items.length})
-        </span>
-
-        {/* BADGE MOBILE */}
-        <span
-          className="
-            md:hidden
-            absolute -top-1 -right-1
-            bg-black text-white
-            text-xs font-bold
-            w-6 h-6
-            rounded-full
-            flex items-center justify-center
-          "
-        >
+        🛒
+        <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
           {items.length}
         </span>
-      </motion.button>
+      </button>
 
       {/* DRAWER */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/60 flex justify-end"
+            className="fixed inset-0 z-50 bg-black/60"
+            onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setOpen(false)}
           >
             <motion.div
               className="
-                w-full max-w-md h-full
-                bg-neutral-950
-                p-6 flex flex-col
+                absolute right-0 top-0 h-full w-full max-w-md
+                bg-neutral-950 p-6 text-white
+                flex flex-col
               "
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -104,47 +107,36 @@ export default function CartDrawer() {
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* HEADER */}
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  Seu orçamento
-                </h2>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-neutral-300 hover:text-white"
-                >
-                  ✕
-                </button>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Seu orçamento</h2>
+                <button onClick={() => setOpen(false)}>✕</button>
               </div>
 
-              {/* LISTA */}
-              <div className="flex-1 overflow-auto space-y-4">
+              {/* LISTA DE PRODUTOS */}
+              <div className="flex-1 space-y-4 overflow-auto">
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="flex gap-4 border-b border-white/10 pb-4"
+                    className="
+                      flex items-center justify-between
+                      border-b border-white/10 pb-2
+                    "
                   >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-
-                    <div className="flex-1">
-                      <p className="font-medium text-white">
-                        {item.name}
-                      </p>
-                      <p className="text-emerald-400 font-semibold">
+                    <div>
+                      <p>{item.name}</p>
+                      <p className="text-green-400 text-sm">
                         R$ {Number(item.price).toFixed(2)}
                       </p>
                     </div>
 
+                    {/* BOTÃO REMOVER */}
                     <button
-                      onClick={() => {
-                        removeFromCart(index);
-                        refresh();
-                      }}
-                      className="text-red-400 hover:text-red-300"
+                      onClick={() => removeFromCart(index)}
+                      className="
+                        text-red-500 text-sm
+                        hover:text-red-400 transition
+                      "
+                      aria-label="Remover produto"
                     >
                       ✕
                     </button>
@@ -152,26 +144,21 @@ export default function CartDrawer() {
                 ))}
               </div>
 
-              {/* TOTAL */}
-              <div className="mt-6 pt-4 border-t border-white/10 flex justify-between text-lg font-semibold">
-                <span className="text-neutral-200">Total</span>
-                <span className="text-emerald-400">
-                  R$ {total.toFixed(2)}
-                </span>
-              </div>
-
-              {/* AÇÕES */}
-              <div className="mt-6 flex gap-4">
-                <button
-                  onClick={() => setOpen(false)}
-                  className="flex-1 py-3 rounded-lg border border-white/30 text-white hover:bg-white/10 transition"
-                >
-                  Voltar
-                </button>
+              {/* TOTAL + ENVIAR */}
+              <div className="mt-6 border-t border-white/10 pt-4">
+                <div className="flex justify-between font-bold mb-4">
+                  <span>Total</span>
+                  <span className="text-green-400">
+                    R$ {total.toFixed(2)}
+                  </span>
+                </div>
 
                 <button
                   onClick={() => setLeadOpen(true)}
-                  className="flex-1 py-3 rounded-lg bg-green-600 text-black font-bold hover:brightness-110 transition"
+                  className="
+                    w-full bg-green-600 text-black
+                    py-3 rounded-lg font-bold
+                  "
                 >
                   Enviar pedido
                 </button>
@@ -181,12 +168,11 @@ export default function CartDrawer() {
         )}
       </AnimatePresence>
 
-      {/* MODAL DE LEAD */}
-      <LeadModal
+      {/* MODAL DE PEDIDO (PIX) */}
+      <LeadModalPedido
         open={leadOpen}
         onClose={() => setLeadOpen(false)}
-        mode="orcamento"
-        items={items}
+        onConfirm={handleConfirm}
       />
     </>
   );
