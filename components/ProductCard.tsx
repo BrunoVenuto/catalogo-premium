@@ -1,38 +1,55 @@
 "use client";
 
 import { Product } from "@/config/products";
+import { addToCart } from "@/lib/cart";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
-export default function ProductCard({
-  product,
-  onClick,
-}: {
-  product: Product;
-  onClick: () => void;
-}) {
+export default function ProductCard({ product }: { product: Product }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-      whileHover={{ y: -6, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      onClick={onClick}
-      className="cursor-pointer bg-neutral-900 border border-white/10 p-4 rounded-lg hover:border-white/30 transition"
+      whileHover={{ y: -6 }}
+      className="
+        bg-neutral-900
+        border border-white/10
+        rounded-xl
+        overflow-hidden
+        transition
+        hover:border-yellow-400/40
+      "
     >
-      <div className="overflow-hidden rounded-lg">
-        <motion.img
+      {/* IMAGEM → PÁGINA DO PRODUTO */}
+      <Link href={`/produto/${product.id}`}>
+        <img
           src={product.image}
           alt={product.name}
           className="w-full h-64 object-cover"
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.4 }}
         />
-      </div>
+      </Link>
 
-      <h3 className="mt-4 font-medium">{product.name}</h3>
-      <p className="text-emerald-400 font-bold">R$ {product.price}</p>
+      <div className="p-5">
+        <h3 className="font-semibold text-lg mb-2">
+          {product.name}
+        </h3>
+
+        <p className="text-emerald-400 font-bold mb-4">
+          R$ {Number(product.price).toFixed(2)}
+        </p>
+
+        <button
+          onClick={() => addToCart(product)}
+          className="
+            w-full
+            bg-green-600
+            text-black
+            py-3 rounded-lg
+            font-bold
+            hover:brightness-110 transition
+          "
+        >
+          Adicionar ao orçamento
+        </button>
+      </div>
     </motion.div>
   );
 }
