@@ -37,7 +37,7 @@ export default function Collections() {
           animate={{ x: ["-50%", "0%"] }}
           transition={{
             ease: "linear",
-            duration: 30,
+            duration: 12,
             repeat: Infinity,
           }}
         >

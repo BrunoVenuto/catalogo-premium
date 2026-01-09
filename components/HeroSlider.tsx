@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function HeroSlider() {
   return (
-    <section className="relative h-screen md:h-[90vh] bg-black overflow-hidden">
+    <section className="relative h-screen md:h-[90vh] overflow-hidden bg-black">
       
       {/* IMAGEM DESKTOP */}
       <img
@@ -20,20 +20,21 @@ export default function HeroSlider() {
         "
       />
 
-      {/* IMAGEM MOBILE – MOSTRAR MAIS O ATLETA */}
+      {/* IMAGEM MOBILE (OCUPA 100% + FOCO NO ATLETA) */}
       <img
         src={siteConfig.hero.imageMobile}
         alt="Hero mobile"
         className="
           absolute inset-0
           w-full h-full
-          object-contain
+          object-cover
+          object-right
           md:hidden
         "
       />
 
-      {/* OVERLAY (MAIS LEVE NO MOBILE) */}
-      <div className="absolute inset-0 bg-black/50 md:bg-black/60" />
+      {/* OVERLAY */}
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* CONTEÚDO */}
       <div className="relative z-10 h-full flex items-center">
