@@ -8,6 +8,18 @@ import Link from "next/link";
 export default function Header() {
   const [open, setOpen] = useState(false);
 
+  const consultoriaLink = `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(
+    siteConfig.consultoriaMessage
+  )}`;
+
+  const mobileLinkClass = `
+    block w-full px-4 py-3 rounded-lg
+    text-white text-lg font-medium
+    transition
+    hover:bg-white/10 hover:text-yellow-400
+    active:bg-white/20
+  `;
+
   return (
     <>
       <motion.header
@@ -31,17 +43,17 @@ export default function Header() {
           </Link>
 
           {/* MENU DESKTOP */}
-          <nav className="hidden md:flex gap-8 text-sm text-neutral-300">
-            <Link href="/" className="hover:text-white transition">
+          <nav className="hidden md:flex gap-8 text-sm text-neutral-200">
+            <Link href="/" className="hover:text-yellow-400 transition">
               Home
             </Link>
-            <Link href="/#collections" className="hover:text-white transition">
+            <Link href="/#collections" className="hover:text-yellow-400 transition">
               Coleções
             </Link>
-            <Link href="/#products" className="hover:text-white transition">
+            <Link href="/#products" className="hover:text-yellow-400 transition">
               Produtos
             </Link>
-            <Link href="/#contact" className="hover:text-white transition">
+            <Link href="/#contact" className="hover:text-yellow-400 transition">
               Contato
             </Link>
           </nav>
@@ -50,6 +62,7 @@ export default function Header() {
           <button
             onClick={() => setOpen(true)}
             className="md:hidden text-white text-3xl"
+            aria-label="Abrir menu"
           >
             ☰
           </button>
@@ -60,20 +73,21 @@ export default function Header() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/60"
+            className="fixed inset-0 z-50 bg-black/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setOpen(false)}
           >
             <motion.div
-              className="absolute top-0 right-0 w-72 h-full bg-neutral-950 p-6"
+              className="absolute top-0 right-0 w-80 h-full bg-neutral-950 p-6 flex flex-col"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
+              {/* TOPO */}
               <div className="flex items-center justify-between mb-10">
                 <Link
                   href="/"
@@ -90,39 +104,66 @@ export default function Header() {
                 <button
                   onClick={() => setOpen(false)}
                   className="text-white text-2xl"
+                  aria-label="Fechar menu"
                 >
                   ✕
                 </button>
               </div>
 
-              <nav className="flex flex-col gap-6 text-lg">
-                <Link href="/" onClick={() => setOpen(false)}>
+              {/* LINKS MOBILE */}
+              <nav className="flex flex-col gap-2">
+                <Link href="/" onClick={() => setOpen(false)} className={mobileLinkClass}>
                   Home
                 </Link>
-                <Link href="/#collections" onClick={() => setOpen(false)}>
+                <Link href="/#collections" onClick={() => setOpen(false)} className={mobileLinkClass}>
                   Coleções
                 </Link>
-                <Link href="/#products" onClick={() => setOpen(false)}>
+                <Link href="/#products" onClick={() => setOpen(false)} className={mobileLinkClass}>
                   Produtos
                 </Link>
-                <Link href="/#contact" onClick={() => setOpen(false)}>
+                <Link href="/#contact" onClick={() => setOpen(false)} className={mobileLinkClass}>
                   Contato
                 </Link>
-
-                {/* BOTÃO ORÇAMENTO */}
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    const btn = document.querySelector(
-                      "button[data-cart-button]"
-                    ) as HTMLButtonElement | null;
-                    btn?.click();
-                  }}
-                  className="mt-6 bg-green-600 text-black py-3 rounded-lg font-semibold"
-                >
-                  🛒 Ver Orçamento
-                </button>
               </nav>
+
+              {/* CTA CONSULTORIA */}
+              <div className="mt-auto pt-8">
+                <a
+                  href={consultoriaLink}
+                  target="_blank"
+                  className="
+                    block w-full text-center
+                    bg-yellow-400 text-black
+                    py-4 rounded-xl
+                    font-bold text-lg
+                    shadow-lg
+                    hover:brightness-110 transition
+                  "
+                >
+                  💬 Solicitar consultoria
+                </a>
+              </div>
+
+              {/* BOTÃO ORÇAMENTO */}
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  const btn = document.querySelector(
+                    "button[data-cart-button]"
+                  ) as HTMLButtonElement | null;
+                  btn?.click();
+                }}
+                className="
+                  mt-4
+                  w-full
+                  bg-green-600 text-black
+                  py-4 rounded-xl
+                  font-bold text-lg
+                  hover:brightness-110 transition
+                "
+              >
+                🛒 Ver Orçamento
+              </button>
             </motion.div>
           </motion.div>
         )}

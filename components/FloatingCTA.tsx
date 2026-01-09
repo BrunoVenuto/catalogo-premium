@@ -13,12 +13,13 @@ export default function FloatingCTA() {
       href={link}
       target="_blank"
       className="
+        hidden md:flex
         fixed z-40
         bottom-24 right-6
         bg-yellow-400 text-black
         px-6 py-4 rounded-full
         font-bold shadow-2xl
-        flex items-center gap-2
+        items-center gap-2
       "
       animate={{
         scale: [1, 1.12, 1],
