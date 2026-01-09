@@ -32,4 +32,29 @@ export const products: Product[] = [
     category: "Linha Premium",
     description: "Descrição completa do Produto Gama.",
   },
+  {
+    id: 4,
+    name: "Trembolona",
+    price: 199,
+    image: "/images/trembolona.jpg",
+    category: "Linha Landerlan",
+    description: "Descrição completa do Produto Alpha.",
+  },
+  {
+    id: 5,
+    name: "Produto Beta",
+    price: 299,
+    image: "/images/trembolona.jpg",
+    category: "Linha Cooper",
+    description: "Descrição completa do Produto Beta.",
+  },
+  {
+    id: 6,
+    name: "Produto Gama",
+    price: 399,
+    image: "/images/trembolona.jpg",
+    category: "Linha Premium",
+    description: "Descrição completa do Produto Gama.",
+  },
+  
 ];
