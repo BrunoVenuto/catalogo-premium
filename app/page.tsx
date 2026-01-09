@@ -6,7 +6,6 @@ import SocialProof from "@/components/SocialProof";
 import ProductSection from "@/components/ProductSection";
 import CartDrawer from "@/components/CartDrawer";
 import FloatingCTA from "@/components/FloatingCTA";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -22,7 +21,6 @@ export default function Home() {
 
       <CartDrawer />
       <FloatingCTA />
-      <Footer />
     </>
   );
 }

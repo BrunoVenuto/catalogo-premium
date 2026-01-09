@@ -35,18 +35,20 @@ export default function CartDrawer() {
         data-cart-button
         onClick={() => setOpen(true)}
         className="
-          fixed z-50
-          bottom-6 right-6
+          fixed z-50 bottom-6 right-6
           bg-green-600 text-black
-          px-6 py-4 rounded-full
+          w-14 h-14 md:w-auto md:h-auto
+          md:px-6 md:py-4
+          rounded-full md:rounded-full
           font-bold shadow-2xl
+          flex items-center justify-center gap-2
         "
         animate={{
           scale: [1, 1.12, 1],
           boxShadow: [
-            '0 0 0px rgba(34,197,94,0)',
-            '0 0 35px rgba(34,197,94,0.9)',
-            '0 0 0px rgba(34,197,94,0)',
+            "0 0 0px rgba(34,197,94,0)",
+            "0 0 35px rgba(34,197,94,0.9)",
+            "0 0 0px rgba(34,197,94,0)",
           ],
         }}
         transition={{
@@ -56,7 +58,28 @@ export default function CartDrawer() {
         }}
         whileTap={{ scale: 0.95 }}
       >
-        🛒 Orçamento ({items.length})
+        {/* ÍCONE */}
+        <span className="text-2xl">🛒</span>
+
+        {/* TEXTO (SÓ DESKTOP) */}
+        <span className="hidden md:inline">
+          Orçamento ({items.length})
+        </span>
+
+        {/* BADGE MOBILE */}
+        <span
+          className="
+            md:hidden
+            absolute -top-1 -right-1
+            bg-black text-white
+            text-xs font-bold
+            w-6 h-6
+            rounded-full
+            flex items-center justify-center
+          "
+        >
+          {items.length}
+        </span>
       </motion.button>
 
       {/* DRAWER */}
@@ -99,11 +122,7 @@ export default function CartDrawer() {
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="
-                      flex gap-4
-                      border-b border-white/10
-                      pb-4
-                    "
+                    className="flex gap-4 border-b border-white/10 pb-4"
                   >
                     <img
                       src={item.image}
@@ -134,17 +153,8 @@ export default function CartDrawer() {
               </div>
 
               {/* TOTAL */}
-              <div
-                className="
-                  mt-6 pt-4
-                  border-t border-white/10
-                  flex justify-between
-                  text-lg font-semibold
-                "
-              >
-                <span className="text-neutral-200">
-                  Total
-                </span>
+              <div className="mt-6 pt-4 border-t border-white/10 flex justify-between text-lg font-semibold">
+                <span className="text-neutral-200">Total</span>
                 <span className="text-emerald-400">
                   R$ {total.toFixed(2)}
                 </span>
@@ -154,26 +164,14 @@ export default function CartDrawer() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={() => setOpen(false)}
-                  className="
-                    flex-1 py-3 rounded-lg
-                    border border-white/30
-                    text-white
-                    hover:bg-white/10
-                    transition
-                  "
+                  className="flex-1 py-3 rounded-lg border border-white/30 text-white hover:bg-white/10 transition"
                 >
                   Voltar
                 </button>
 
                 <button
                   onClick={() => setLeadOpen(true)}
-                  className="
-                    flex-1 py-3 rounded-lg
-                    bg-green-600 text-black
-                    font-bold
-                    hover:brightness-110
-                    transition
-                  "
+                  className="flex-1 py-3 rounded-lg bg-green-600 text-black font-bold hover:brightness-110 transition"
                 >
                   Enviar pedido
                 </button>
