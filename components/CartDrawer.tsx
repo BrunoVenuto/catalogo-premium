@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { getCart, clearCart, removeFromCart } from "@/lib/cart";
-import { siteConfig } from "@/config/site";
 import LeadModalPedido from "./LeadModalPedido";
+import LeadModalConsultoria from "./LeadModalConsultoria";
 import { Product } from "@/config/products";
+import { siteConfig } from "@/config/site";
+import { useRouter } from "next/navigation";
 
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
-  const [leadOpen, setLeadOpen] = useState(false);
+  const [pedidoOpen, setPedidoOpen] = useState(false);
+  const [consultoriaOpen, setConsultoriaOpen] = useState(false);
   const [items, setItems] = useState<Product[]>([]);
   const router = useRouter();
 
@@ -18,7 +20,6 @@ export default function CartDrawer() {
     function update() {
       setItems(getCart());
     }
-
     update();
     window.addEventListener("cart:update", update);
     return () => window.removeEventListener("cart:update", update);
@@ -29,28 +30,24 @@ export default function CartDrawer() {
     0
   );
 
-  function handleConfirm(name: string) {
+  function handleConfirmPedido(name: string) {
     const message =
       `Olá, meu nome é ${name}.\n\n` +
-      `Gostaria de fazer o seguinte pedido:\n\n` +
       items
         .map(
           (item) =>
             `• ${item.name} — R$ ${Number(item.price).toFixed(2)}`
         )
         .join("\n") +
-      `\n\nTotal: R$ ${total.toFixed(2)}\n\n` +
-      `Pode me enviar a chave PIX para pagamento?`;
+      `\n\nTotal: R$ ${total.toFixed(2)}`;
 
     window.open(
-      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(
-        message
-      )}`,
+      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
       "_blank"
     );
 
     clearCart();
-    setLeadOpen(false);
+    setPedidoOpen(false);
     setOpen(false);
 
     setTimeout(() => {
@@ -58,12 +55,24 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  // 👉 se carrinho esvaziar, fecha automaticamente
-  useEffect(() => {
-    if (items.length === 0) {
-      setOpen(false);
-    }
-  }, [items]);
+  function handleConsultoriaSubmit(data: {
+    name: string;
+    phone: string;
+    goal: string;
+  }) {
+    const message =
+      `Olá, meu nome é ${data.name}.\n` +
+      `Telefone: ${data.phone}\n` +
+      `Objetivo: ${data.goal}\n\n` +
+      `Gostaria de uma consultoria antes de fazer meu pedido.`;
+
+    window.open(
+      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+
+    setConsultoriaOpen(false);
+  }
 
   if (items.length === 0) return null;
 
@@ -71,13 +80,8 @@ export default function CartDrawer() {
     <>
       {/* BOTÃO DO CARRINHO */}
       <button
-        data-cart-button
         onClick={() => setOpen(true)}
-        className="
-          fixed bottom-6 right-6 z-50
-          bg-green-600 w-14 h-14 rounded-full
-          flex items-center justify-center
-        "
+        className="fixed bottom-6 right-6 z-50 bg-green-600 w-14 h-14 rounded-full flex items-center justify-center"
       >
         🛒
         <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -96,11 +100,7 @@ export default function CartDrawer() {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="
-                absolute right-0 top-0 h-full w-full max-w-md
-                bg-neutral-950 p-6 text-white
-                flex flex-col
-              "
+              className="absolute right-0 top-0 h-full w-full max-w-md bg-neutral-950 p-6 text-white flex flex-col"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -112,15 +112,11 @@ export default function CartDrawer() {
                 <button onClick={() => setOpen(false)}>✕</button>
               </div>
 
-              {/* LISTA DE PRODUTOS */}
               <div className="flex-1 space-y-4 overflow-auto">
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="
-                      flex items-center justify-between
-                      border-b border-white/10 pb-2
-                    "
+                    className="flex justify-between border-b border-white/10 pb-2"
                   >
                     <div>
                       <p>{item.name}</p>
@@ -128,15 +124,9 @@ export default function CartDrawer() {
                         R$ {Number(item.price).toFixed(2)}
                       </p>
                     </div>
-
-                    {/* BOTÃO REMOVER */}
                     <button
                       onClick={() => removeFromCart(index)}
-                      className="
-                        text-red-500 text-sm
-                        hover:text-red-400 transition
-                      "
-                      aria-label="Remover produto"
+                      className="text-red-500"
                     >
                       ✕
                     </button>
@@ -144,9 +134,8 @@ export default function CartDrawer() {
                 ))}
               </div>
 
-              {/* TOTAL + ENVIAR */}
-              <div className="mt-6 border-t border-white/10 pt-4">
-                <div className="flex justify-between font-bold mb-4">
+              <div className="mt-6 border-t border-white/10 pt-4 space-y-4">
+                <div className="flex justify-between font-bold">
                   <span>Total</span>
                   <span className="text-green-400">
                     R$ {total.toFixed(2)}
@@ -154,13 +143,17 @@ export default function CartDrawer() {
                 </div>
 
                 <button
-                  onClick={() => setLeadOpen(true)}
-                  className="
-                    w-full bg-green-600 text-black
-                    py-3 rounded-lg font-bold
-                  "
+                  onClick={() => setPedidoOpen(true)}
+                  className="w-full bg-green-600 py-3 rounded-lg font-bold text-black"
                 >
                   Enviar pedido
+                </button>
+
+                <button
+                  onClick={() => setConsultoriaOpen(true)}
+                  className="w-full bg-yellow-400 py-3 rounded-lg font-bold text-black"
+                >
+                  💬 Solicitar consultoria
                 </button>
               </div>
             </motion.div>
@@ -168,11 +161,17 @@ export default function CartDrawer() {
         )}
       </AnimatePresence>
 
-      {/* MODAL DE PEDIDO (PIX) */}
+      {/* MODAIS */}
       <LeadModalPedido
-        open={leadOpen}
-        onClose={() => setLeadOpen(false)}
-        onConfirm={handleConfirm}
+        open={pedidoOpen}
+        onClose={() => setPedidoOpen(false)}
+        onConfirm={handleConfirmPedido}
+      />
+
+      <LeadModalConsultoria
+        open={consultoriaOpen}
+        onClose={() => setConsultoriaOpen(false)}
+        onSubmit={handleConsultoriaSubmit}
       />
     </>
   );

@@ -1,83 +1,76 @@
 "use client";
 
-import { Product } from "@/config/products";
-import { addToCart } from "@/lib/cart";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { Product } from "@/config/products";
+
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  product: Product;
+  onAddToCart: () => void;
+};
 
 export default function ProductModal({
-  product,
+  open,
   onClose,
-}: {
-  product: Product;
-  onClose: () => void;
-}) {
-  if (!product) return null;
-
-  function handleAdd() {
-    addToCart(product);
-    alert("Produto adicionado ao orçamento");
-    onClose();
-  }
-
+  product,
+  onAddToCart,
+}: Props) {
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      >
+      {open && (
         <motion.div
-          className="bg-neutral-900 max-w-3xl w-full rounded-xl overflow-hidden grid md:grid-cols-2"
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-          onClick={(e) => e.stopPropagation()}
+          className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center px-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
         >
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-
-          <div className="p-8 relative">
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-neutral-950 rounded-xl p-6 w-full max-w-sm text-white"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.9 }}
+          >
+            {/* FECHAR */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-white/60 hover:text-white text-xl"
+              className="absolute top-4 right-4 text-white text-xl"
             >
               ✕
             </button>
 
-            <h2 className="text-2xl font-bold">{product.name}</h2>
-            <p className="mt-2 text-emerald-400 text-xl font-semibold">
-              R$ {product.price}
+            {/* IMAGEM */}
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-56 object-contain mb-4"
+            />
+
+            {/* NOME DO PRODUTO */}
+            <h2 className="text-xl font-bold mb-2 text-center">
+              {product.name}
+            </h2>
+
+            {/* PREÇO */}
+            <p className="text-green-400 font-semibold mb-6 text-center">
+              R$ {product.price.toFixed(2)}
             </p>
 
-            <p className="mt-6 text-neutral-300">
-              {product.description}
-            </p>
-
-            <div className="flex gap-4 mt-8">
-              <button
-                onClick={handleAdd}
-                className="flex-1 bg-emerald-600 py-4 rounded-lg text-black font-semibold hover:brightness-110 transition"
-              >
-                Adicionar ao orçamento
-              </button>
-
-              <Link
-                href={`/produto/${product.id}`}
-                className="flex-1 border border-white/20 py-4 rounded-lg text-center hover:border-white"
-              >
-                Ver detalhes
-              </Link>
-            </div>
-          </div>
+            {/* BOTÃO */}
+            <button
+              onClick={() => {
+                onAddToCart();
+                onClose();
+              }}
+              className="w-full bg-green-600 text-black py-3 rounded-lg font-bold hover:brightness-110 transition"
+            >
+              Adicionar ao orçamento
+            </button>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }

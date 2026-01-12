@@ -1,26 +1,15 @@
-import { Suspense } from "react";
-
 import HeroSlider from "@/components/HeroSlider";
 import Collections from "@/components/Collections";
-import SocialProof from "@/components/SocialProof";
 import ProductSection from "@/components/ProductSection";
-import CartDrawer from "@/components/CartDrawer";
-import FloatingCTA from "@/components/FloatingCTA";
+import SocialProof from "@/components/SocialProof";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <>
+    <main>
       <HeroSlider />
       <Collections />
+      <ProductSection />
       <SocialProof />
-
-      {/* 🔴 IMPORTANTE: Suspense aqui */}
-      <Suspense fallback={null}>
-        <ProductSection />
-      </Suspense>
-
-      <CartDrawer />
-      <FloatingCTA />
-    </>
+    </main>
   );
 }

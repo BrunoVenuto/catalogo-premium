@@ -1,14 +1,10 @@
 import "./globals.css";
-import type { Metadata } from "next";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CartToast from "@/components/CartToast";
-
-export const metadata: Metadata = {
-  title: "Catálogo Premium",
-  description: "Produtos de alta performance",
-};
+import FloatingCTA from "@/components/FloatingCTA";
+import CartDrawer from "@/components/CartDrawer";
+import ConsultoriaController from "@/components/ConsultoriaController";
 
 export default function RootLayout({
   children,
@@ -17,15 +13,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="bg-black text-white">
+      <body>
         <Header />
 
         {children}
 
         <Footer />
 
-        {/* 🔥 TOAST GLOBAL (APARECE EM TODAS AS PÁGINAS) */}
-        <CartToast />
+        {/* Globais */}
+        <FloatingCTA />
+        <ConsultoriaController />
+        <CartDrawer />
       </body>
     </html>
   );

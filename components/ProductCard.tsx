@@ -1,55 +1,46 @@
 "use client";
 
-import { Product } from "@/config/products";
-import { addToCart } from "@/lib/cart";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Product } from "@/config/products";
 
-export default function ProductCard({ product }: { product: Product }) {
+type Props = {
+  product: Product;
+  onAddToCart: () => void;
+  onOpen: () => void;
+};
+
+export default function ProductCard({ product, onAddToCart, onOpen }: Props) {
   return (
     <motion.div
-      whileHover={{ y: -6 }}
-      className="
-        bg-neutral-900
-        border border-white/10
-        rounded-xl
-        overflow-hidden
-        transition
-        hover:border-yellow-400/40
-      "
+      whileHover={{ scale: 1.03 }}
+      className="bg-neutral-900 rounded-xl p-4 flex flex-col"
     >
-      {/* IMAGEM → PÁGINA DO PRODUTO */}
-      <Link href={`/produto/${product.id}`}>
+      {/* IMAGEM */}
+      <button onClick={onOpen}>
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-64 object-cover"
+          className="w-full h-48 object-contain mb-4"
         />
-      </Link>
+      </button>
 
-      <div className="p-5">
-        <h3 className="font-semibold text-lg mb-2">
-          {product.name}
-        </h3>
+      {/* NOME DO PRODUTO */}
+      <h3 className="text-white font-bold text-sm md:text-base mb-2 text-center">
+        {product.name}
+      </h3>
 
-        <p className="text-emerald-400 font-bold mb-4">
-          R$ {Number(product.price).toFixed(2)}
-        </p>
+      {/* PREÇO */}
+      <p className="text-green-400 font-semibold mb-4 text-center">
+        R$ {product.price.toFixed(2)}
+      </p>
 
-        <button
-          onClick={() => addToCart(product)}
-          className="
-            w-full
-            bg-green-600
-            text-black
-            py-3 rounded-lg
-            font-bold
-            hover:brightness-110 transition
-          "
-        >
-          Adicionar ao orçamento
-        </button>
-      </div>
+      {/* BOTÃO */}
+      <button
+        onClick={onAddToCart}
+        className="mt-auto bg-green-600 text-black py-3 rounded-lg font-bold hover:brightness-110 transition"
+      >
+        Adicionar ao orçamento
+      </button>
     </motion.div>
   );
 }

@@ -16,9 +16,17 @@ export default function LeadModalPedido({
 }: Props) {
   const [name, setName] = useState("");
 
+  function handleNameChange(value: string) {
+    // aceita apenas letras, espaços e acentos
+    const sanitized = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
+    setName(sanitized);
+  }
+
   function handleConfirm() {
-    if (!name) return;
-    onConfirm(name);
+    const finalName = name.trim();
+    if (!finalName) return;
+
+    onConfirm(finalName);
     setName("");
   }
 
@@ -39,19 +47,22 @@ export default function LeadModalPedido({
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-3">
+            <h2 className="text-xl font-bold mb-4">
               Antes de enviar o pedido
             </h2>
 
-            <p className="text-sm text-neutral-300 mb-4">
-              Informe seu nome. O pagamento será feito via PIX.
+            <p className="text-neutral-300 mb-4 text-sm">
+              Informe seu nome para identificação.
+              O pagamento será feito via <strong>PIX</strong>.
             </p>
 
             <input
+              type="text"
+              inputMode="text"
               placeholder="Seu nome"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full mb-4 bg-black border border-white/20 rounded-lg px-4 py-3"
+              onChange={(e) => handleNameChange(e.target.value)}
+              className="w-full mb-4 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
             />
 
             <div className="flex gap-3">
@@ -61,9 +72,10 @@ export default function LeadModalPedido({
               >
                 Cancelar
               </button>
+
               <button
                 onClick={handleConfirm}
-                className="flex-1 py-3 rounded-lg bg-green-600 text-black font-bold"
+                className="flex-1 py-3 rounded-lg bg-green-600 text-black font-bold hover:brightness-110"
               >
                 Enviar pedido
               </button>

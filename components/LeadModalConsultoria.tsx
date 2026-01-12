@@ -3,7 +3,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
-type Props = {
+export default function LeadModalConsultoria({
+  open,
+  onClose,
+  onSubmit,
+}: {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: {
@@ -11,13 +15,7 @@ type Props = {
     phone: string;
     goal: string;
   }) => void;
-};
-
-export default function LeadModalConsultoria({
-  open,
-  onClose,
-  onSubmit,
-}: Props) {
+}) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [goal, setGoal] = useState("");
@@ -35,16 +33,10 @@ export default function LeadModalConsultoria({
       {open && (
         <motion.div
           className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center px-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
             className="w-full max-w-sm bg-neutral-950 text-white rounded-xl p-6"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">
@@ -54,14 +46,19 @@ export default function LeadModalConsultoria({
             <input
               placeholder="Seu nome"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) =>
+                setName(e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ""))
+              }
               className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3"
             />
 
             <input
               placeholder="Telefone / WhatsApp"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              inputMode="numeric"
+              onChange={(e) =>
+                setPhone(e.target.value.replace(/\D/g, ""))
+              }
               className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3"
             />
 

@@ -12,9 +12,17 @@ type Props = {
 export default function LeadModal({ open, onClose, onConfirm }: Props) {
   const [name, setName] = useState("");
 
+  function handleNameChange(value: string) {
+    // aceita apenas letras, espaços e acentos
+    const sanitized = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
+    setName(sanitized);
+  }
+
   function handleConfirm() {
-    if (!name.trim()) return;
-    onConfirm(name.trim());
+    const finalName = name.trim();
+    if (!finalName) return;
+
+    onConfirm(finalName);
     setName("");
   }
 
@@ -50,9 +58,10 @@ export default function LeadModal({ open, onClose, onConfirm }: Props) {
 
             <input
               type="text"
+              inputMode="text"
               placeholder="Seu nome"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="
                 w-full mb-4
                 bg-black border border-white/20

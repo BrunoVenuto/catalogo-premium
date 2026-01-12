@@ -8,13 +8,14 @@ import { siteConfig } from "@/config/site";
 export default function FloatingCTA() {
   const [open, setOpen] = useState(false);
 
-  // 🔥 ESCUTA O EVENTO VINDO DO MENU MOBILE
+  // 🔥 ESCUTA EVENTO GLOBAL (MOBILE / MENU / CARRINHO)
   useEffect(() => {
     function handleOpen() {
       setOpen(true);
     }
 
     document.addEventListener("open-consultoria", handleOpen);
+
     return () => {
       document.removeEventListener("open-consultoria", handleOpen);
     };
@@ -41,7 +42,7 @@ export default function FloatingCTA() {
 
   return (
     <>
-      {/* BOTÃO FLUTUANTE (SÓ DESKTOP) */}
+      {/* BOTÃO FLUTUANTE — SOMENTE DESKTOP */}
       <motion.button
         onClick={() => setOpen(true)}
         className="
@@ -51,13 +52,14 @@ export default function FloatingCTA() {
           px-5 py-3 rounded-full
           font-extrabold
           shadow-[0_0_25px_rgba(250,204,21,0.6)]
+          items-center gap-2
         "
         animate={{
           scale: [1, 1.12, 1],
           boxShadow: [
-            "0 0 15px rgba(250,204,21,0.4)",
-            "0 0 30px rgba(250,204,21,0.9)",
-            "0 0 15px rgba(250,204,21,0.4)",
+            '0 0 15px rgba(250,204,21,0.4)',
+            '0 0 30px rgba(250,204,21,0.9)',
+            '0 0 15px rgba(250,204,21,0.4)',
           ],
         }}
         transition={{
