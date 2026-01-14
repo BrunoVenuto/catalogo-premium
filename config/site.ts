@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "Catálogo Premium",
+  name: "Dark Force Nutrition",
 
   whatsapp: "5531995453632",
 
