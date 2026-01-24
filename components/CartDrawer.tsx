@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCart, clearCart, removeFromCart } from "@/lib/cart";
-import LeadModalPedido from "./LeadModalPedido";
+import LeadModalPedido, { PedidoLeadData } from "./LeadModalPedido";
 import LeadModalConsultoria from "./LeadModalConsultoria";
 import { Product } from "@/config/products";
 import { siteConfig } from "@/config/site";
@@ -16,7 +16,7 @@ export default function CartDrawer() {
   const [items, setItems] = useState<Product[]>([]);
   const router = useRouter();
 
-  // ✅ Sempre usar só dígitos no wa.me (evita erro de número inválido)
+  // ✅ wa.me exige só dígitos
   const whatsappTo = useMemo(() => {
     return String(siteConfig.whatsapp || "").replace(/\D/g, "");
   }, []);
@@ -41,13 +41,12 @@ export default function CartDrawer() {
   }, [items]);
 
   function openWhatsApp(message: string) {
-    // Regra prática: BR completo costuma ter 12 ou 13 dígitos (55 + DDD + número)
     if (!whatsappTo || whatsappTo.length < 12) {
       console.error(
-        "Número do WhatsApp inválido em siteConfig.whatsapp. Use apenas dígitos no formato 55DDDNUMERO. Ex: 5531999999999"
+        "Número inválido em siteConfig.whatsapp. Use 55 + DDD + número (somente dígitos). Ex: 5521999999999"
       );
       alert(
-        "Número do WhatsApp está inválido no site. Corrija em config/site.ts (formato: 55DDDNUMERO)."
+        "Número do WhatsApp inválido no site. Corrija em config/site.ts (formato: 55DDDNUMERO)."
       );
       return;
     }
@@ -60,8 +59,7 @@ export default function CartDrawer() {
 
   function handleRemove(index: number) {
     removeFromCart(index);
-    // ✅ Atualiza o estado imediatamente (não depende do evento)
-    setItems(getCart());
+    setItems(getCart()); // atualiza imediatamente
   }
 
   function handleClear() {
@@ -69,20 +67,26 @@ export default function CartDrawer() {
     setItems([]);
   }
 
-  // ✅ AGORA RECEBE: nome, cidade, whatsapp com DDD
-  function handleConfirmPedido(name: string, city: string, phone: string) {
+  function handleConfirmPedido(data: PedidoLeadData) {
     const productsText = items
-      .map((item) => `• ${item.name} — R$ ${Number(item.price).toFixed(2)}`)
+      .map((item) => `- ${item.name} — R$ ${Number(item.price).toFixed(2)}`)
       .join("\n");
 
     const message =
       `NOVO PEDIDO\n\n` +
-      `Nome do cliente: ${name}\n` +
-      `Cidade: ${city}\n` +
-      `WhatsApp (DDD): ${phone}\n\n` +
-      `Produtos:\n${productsText}\n\n` +
-      `Total: R$ ${total.toFixed(2)}\n\n` +
-      `Por favor, me envie a chave PIX para pagamento.`;
+      `DADOS DO CLIENTE\n` +
+      `Nome: ${data.name}\n` +
+      `CEP: ${data.cep}\n` +
+      `Telefone (DDD): ${data.phone}\n` +
+      `CPF: ${data.cpf}\n` +
+      `Rua: ${data.street}\n` +
+      `Número: ${data.number}\n` +
+      `Bairro: ${data.neighborhood}\n` +
+      `Cidade: ${data.city}\n` +
+      `Ponto de referência: ${data.reference || "—"}\n\n` +
+      `PRODUTOS\n${productsText}\n\n` +
+      `TOTAL: R$ ${total.toFixed(2)}\n\n` +
+      `Por favor, me envie a CHAVE PIX para pagamento.`;
 
     openWhatsApp(message);
 
@@ -95,11 +99,7 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  function handleConsultoriaSubmit(data: {
-    name: string;
-    phone: string;
-    goal: string;
-  }) {
+  function handleConsultoriaSubmit(data: { name: string; phone: string; goal: string }) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
       `Telefone: ${data.phone}\n` +
@@ -110,7 +110,6 @@ export default function CartDrawer() {
     setConsultoriaOpen(false);
   }
 
-  // mantém o comportamento original: se carrinho vazio, não mostra o botão
   if (items.length === 0) return null;
 
   return (
@@ -174,9 +173,7 @@ export default function CartDrawer() {
               <div className="mt-6 border-t border-white/10 pt-4 space-y-4">
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-green-400">
-                    R$ {total.toFixed(2)}
-                  </span>
+                  <span className="text-green-400">R$ {total.toFixed(2)}</span>
                 </div>
 
                 <button

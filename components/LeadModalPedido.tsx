@@ -1,52 +1,84 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+export type PedidoLeadData = {
+  name: string;
+  cep: string;
+  phone: string; // com DDD
+  cpf: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  reference: string;
+};
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onConfirm: (name: string, city: string, phone: string) => void;
+  onConfirm: (data: PedidoLeadData) => void;
 };
 
 export default function LeadModalPedido({ open, onClose, onConfirm }: Props) {
   const [name, setName] = useState("");
-  const [city, setCity] = useState("");
+  const [cep, setCep] = useState("");
   const [phone, setPhone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [street, setStreet] = useState("");
+  const [number, setNumber] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [city, setCity] = useState("");
+  const [reference, setReference] = useState("");
 
-  function handleNameChange(value: string) {
-    // aceita apenas letras, espaços e acentos
-    const sanitized = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
-    setName(sanitized);
+  const cepDigits = useMemo(() => cep.replace(/\D/g, ""), [cep]);
+  const phoneDigits = useMemo(() => phone.replace(/\D/g, ""), [phone]);
+  const cpfDigits = useMemo(() => cpf.replace(/\D/g, ""), [cpf]);
+
+  function onlyLettersSpaces(value: string) {
+    return value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
   }
 
-  function handleCityChange(value: string) {
-    // cidade: letras, espaços, acentos, hífen (ex: Rio de Janeiro, Belo-Horizonte)
-    const sanitized = value.replace(/[^a-zA-ZÀ-ÿ\s-]/g, "");
-    setCity(sanitized);
-  }
-
-  function handlePhoneChange(value: string) {
-    // mantém só dígitos (DDD + número)
-    const digitsOnly = value.replace(/\D/g, "");
-    setPhone(digitsOnly);
+  function onlyLettersSpacesHyphen(value: string) {
+    return value.replace(/[^a-zA-ZÀ-ÿ\s-]/g, "");
   }
 
   function handleConfirm() {
-    const finalName = name.trim();
-    const finalCity = city.trim();
-    const finalPhone = phone.trim();
+    const data: PedidoLeadData = {
+      name: name.trim(),
+      cep: cepDigits.trim(),
+      phone: phoneDigits.trim(),
+      cpf: cpfDigits.trim(),
+      street: street.trim(),
+      number: number.trim(),
+      neighborhood: neighborhood.trim(),
+      city: city.trim(),
+      reference: reference.trim(),
+    };
 
-    // validações simples (DDD+cel normalmente 10 ou 11 dígitos no BR)
-    if (!finalName) return;
-    if (!finalCity) return;
-    if (finalPhone.length < 10) return;
+    // validações simples (ajuste se quiser)
+    if (!data.name) return alert("Preencha o NOME.");
+    if (data.cep.length < 8) return alert("CEP inválido (precisa de 8 dígitos).");
+    if (data.phone.length < 10) return alert("Telefone inválido (com DDD).");
+    if (data.cpf.length < 11) return alert("CPF inválido (11 dígitos).");
+    if (!data.street) return alert("Preencha a RUA.");
+    if (!data.number) return alert("Preencha o NÚMERO.");
+    if (!data.neighborhood) return alert("Preencha o BAIRRO.");
+    if (!data.city) return alert("Preencha a CIDADE.");
 
-    onConfirm(finalName, finalCity, finalPhone);
+    onConfirm(data);
 
+    // limpa
     setName("");
-    setCity("");
+    setCep("");
     setPhone("");
+    setCpf("");
+    setStreet("");
+    setNumber("");
+    setNeighborhood("");
+    setCity("");
+    setReference("");
   }
 
   return (
@@ -60,49 +92,119 @@ export default function LeadModalPedido({ open, onClose, onConfirm }: Props) {
           onClick={onClose}
         >
           <motion.div
-            className="w-full max-w-sm bg-neutral-950 text-white rounded-xl p-6"
-            initial={{ scale: 0.9, opacity: 0 }}
+            className="w-full max-w-md bg-neutral-950 text-white rounded-xl p-6 border border-white/10"
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-4">Antes de enviar o pedido</h2>
+            <h2 className="text-xl font-bold mb-2">Finalizar pedido</h2>
 
-            <p className="text-neutral-300 mb-4 text-sm">
-              Preencha seus dados para identificação e cálculo de frete/entrega.
+            <p className="text-sm text-neutral-300 mb-4">
+              ♦️ Suas informações devem estar corretas certifique-se disso!
             </p>
 
-            <input
-              type="text"
-              inputMode="text"
-              placeholder="Seu nome"
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
-            />
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">Nome:</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(onlyLettersSpaces(e.target.value))}
+                  placeholder="Seu nome completo"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
 
-            <input
-              type="text"
-              inputMode="text"
-              placeholder="Sua cidade (ex: Belo Horizonte)"
-              value={city}
-              onChange={(e) => handleCityChange(e.target.value)}
-              className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
-            />
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">⚠️ CEP:</label>
+                <input
+                  value={cep}
+                  onChange={(e) => setCep(e.target.value)}
+                  inputMode="numeric"
+                  placeholder="Somente números (ex: 30140071)"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
 
-            <input
-              type="tel"
-              inputMode="tel"
-              placeholder="Seu WhatsApp com DDD (ex: 31999999999)"
-              value={phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              className="w-full mb-4 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
-            />
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">☎️ TELEFONE:</label>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  inputMode="tel"
+                  placeholder="DDD + número (ex: 21999999999)"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
 
-            <div className="flex gap-3">
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">CPF:</label>
+                <input
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  inputMode="numeric"
+                  placeholder="Somente números (ex: 12345678901)"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">RUA:</label>
+                <input
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  placeholder="Ex: Rua das Flores"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">NÚMERO:</label>
+                <input
+                  value={number}
+                  onChange={(e) => setNumber(e.target.value.replace(/[^\w-]/g, ""))}
+                  placeholder="Ex: 123 / Apto 401"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">BAIRRO:</label>
+                <input
+                  value={neighborhood}
+                  onChange={(e) => setNeighborhood(e.target.value)}
+                  placeholder="Ex: Centro"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">CIDADE:</label>
+                <input
+                  value={city}
+                  onChange={(e) => setCity(onlyLettersSpacesHyphen(e.target.value))}
+                  placeholder="Ex: Rio de Janeiro"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-neutral-200 block mb-1">
+                  Ponto de referência:
+                </label>
+                <input
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder="Ex: Próximo ao mercado X"
+                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-green-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-5">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 rounded-lg border border-white/30"
+                className="flex-1 py-3 rounded-lg border border-white/30 hover:border-white/50"
               >
                 Cancelar
               </button>
@@ -115,8 +217,8 @@ export default function LeadModalPedido({ open, onClose, onConfirm }: Props) {
               </button>
             </div>
 
-            <p className="text-xs text-neutral-400 mt-3">
-              *O telefone será usado apenas para facilitar o contato/entrega.
+            <p className="text-xs text-neutral-500 mt-3">
+              *Se algum dado estiver errado, pode atrasar a entrega.
             </p>
           </motion.div>
         </motion.div>
