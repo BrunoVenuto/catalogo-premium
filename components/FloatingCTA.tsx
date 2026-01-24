@@ -1,48 +1,64 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import LeadModalConsultoria from "./LeadModalConsultoria";
 import { siteConfig } from "@/config/site";
 
+type ConsultoriaData = {
+  name: string;
+  phone: string;
+  goal: string;
+};
+
 export default function FloatingCTA() {
   const [open, setOpen] = useState(false);
 
-  // 🔥 ESCUTA EVENTO GLOBAL (MOBILE / MENU / CARRINHO)
+  // 💬 NÚMERO CORRETO DA CONSULTORIA (somente dígitos)
+  const whatsappConsultoria = useMemo(
+    () => String(siteConfig.whatsappConsultoria || "").replace(/\D/g, ""),
+    []
+  );
+
   useEffect(() => {
     function handleOpen() {
       setOpen(true);
     }
 
-    document.addEventListener("open-consultoria", handleOpen);
+    document.addEventListener("open-consultoria", handleOpen as EventListener);
 
     return () => {
-      document.removeEventListener("open-consultoria", handleOpen);
+      document.removeEventListener("open-consultoria", handleOpen as EventListener);
     };
   }, []);
 
-  function handleSubmit(data: {
-    name: string;
-    phone: string;
-    goal: string;
-  }) {
+  function openWhatsApp(message: string) {
+    if (!whatsappConsultoria || whatsappConsultoria.length < 10) {
+      alert("Número de consultoria inválido no config/site.ts");
+      return;
+    }
+
+    window.open(
+      `https://wa.me/${whatsappConsultoria}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  }
+
+  function handleSubmit(data: ConsultoriaData) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
       `Telefone: ${data.phone}\n` +
       `Objetivo: ${data.goal}\n\n` +
       `Gostaria de uma consultoria antes de fazer meu pedido.`;
 
-    window.open(
-      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-
+    // ✅ AGORA VAI PARA O NÚMERO CERTO
+    openWhatsApp(message);
     setOpen(false);
   }
 
   return (
     <>
-      {/* BOTÃO FLUTUANTE — SOMENTE DESKTOP */}
+      {/* BOTÃO FLUTUANTE */}
       <motion.button
         onClick={() => setOpen(true)}
         className="
@@ -57,30 +73,40 @@ export default function FloatingCTA() {
         animate={{
           scale: [1, 1.12, 1],
           boxShadow: [
-            '0 0 15px rgba(250,204,21,0.4)',
-            '0 0 30px rgba(250,204,21,0.9)',
-            '0 0 15px rgba(250,204,21,0.4)',
+            "0 0 15px rgba(250,204,21,0.4)",
+            "0 0 30px rgba(250,204,21,0.9)",
+            "0 0 15px rgba(250,204,21,0.4)",
           ],
         }}
-        transition={{
-          duration: 1.6,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        whileHover={{ scale: 1.15 }}
-        aria-label="Solicitar consultoria"
+        transition={{ duration: 1.4, repeat: Infinity }}
       >
-        💬 Solicitar consultoria
+        💬 Consultoria
       </motion.button>
 
-      {/* MODAL DE CONSULTORIA */}
+      {/* MODAL */}
       <AnimatePresence>
         {open && (
-          <LeadModalConsultoria
-            open={open}
-            onClose={() => setOpen(false)}
-            onSubmit={handleSubmit}
-          />
+          <motion.div
+            className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md"
+            >
+              <LeadModalConsultoria
+                open={open}
+                onClose={() => setOpen(false)}
+                onSubmit={handleSubmit}
+              />
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>
