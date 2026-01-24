@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Dark Force Nutrition",
 
-  whatsapp: "5531995453632",
+  whatsapp: "5531999266564",
 
   whatsappMessage: "Olá! Eu vim do seu site e gostaria de fazer um pedido com os seguintes itens:",
   consultoriaMessage: "Olá, preciso de uma consultoria antes de fazer meu pedido.",
