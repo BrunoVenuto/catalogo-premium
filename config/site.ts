@@ -1,8 +1,15 @@
 export const siteConfig = {
   name: "Strong Suplementos",
 
-  // ⚠️ FORMATO OBRIGATÓRIO: 55 + DDD + NÚMERO (somente dígitos)
-  // Exemplo válido: 5521999266564
+  // 📦 Número para RECEBER PEDIDOS (somente dígitos: 55 + DDD + número)
+  whatsappPedido: "5521999226564", // <-- troque pelo SEU número real de pedidos
+
+  // 💬 Número para CONSULTORIA (Paraguai): +595 976 349138
+  // wa.me exige somente dígitos:
+  whatsappConsultoria: "595976349138",
+
+  // ✅ compatibilidade: se algum lugar do projeto ainda usa siteConfig.whatsapp
+  // apontamos para o número de PEDIDOS
   whatsapp: "5521999226564",
 
   whatsappMessage:

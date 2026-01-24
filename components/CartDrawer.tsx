@@ -9,6 +9,12 @@ import { Product } from "@/config/products";
 import { siteConfig } from "@/config/site";
 import { useRouter } from "next/navigation";
 
+type ConsultoriaData = {
+  name: string;
+  phone: string;
+  goal: string;
+};
+
 export default function CartDrawer() {
   const [open, setOpen] = useState(false);
   const [pedidoOpen, setPedidoOpen] = useState(false);
@@ -17,9 +23,15 @@ export default function CartDrawer() {
   const router = useRouter();
 
   // ✅ wa.me exige só dígitos
-  const whatsappTo = useMemo(() => {
-    return String(siteConfig.whatsapp || "").replace(/\D/g, "");
-  }, []);
+  const whatsappPedido = useMemo(
+    () => String(siteConfig.whatsappPedido || "").replace(/\D/g, ""),
+    []
+  );
+
+  const whatsappConsultoria = useMemo(
+    () => String(siteConfig.whatsappConsultoria || "").replace(/\D/g, ""),
+    []
+  );
 
   useEffect(() => {
     function update() {
@@ -40,19 +52,20 @@ export default function CartDrawer() {
     return items.reduce((sum, item) => sum + Number(item.price), 0);
   }, [items]);
 
-  function openWhatsApp(message: string) {
-    if (!whatsappTo || whatsappTo.length < 12) {
+  function openWhatsApp(to: string, message: string) {
+    // Regra geral: número internacional completo, somente dígitos
+    if (!to || to.length < 10) {
       console.error(
-        "Número inválido em siteConfig.whatsapp. Use 55 + DDD + número (somente dígitos). Ex: 5521999999999"
+        "Número de WhatsApp inválido no config/site.ts. Use apenas dígitos (ex: 595976349138 ou 5521999999999)."
       );
       alert(
-        "Número do WhatsApp inválido no site. Corrija em config/site.ts (formato: 55DDDNUMERO)."
+        "Número do WhatsApp inválido no config/site.ts. Corrija para o formato internacional somente com dígitos."
       );
       return;
     }
 
     window.open(
-      `https://wa.me/${whatsappTo}?text=${encodeURIComponent(message)}`,
+      `https://wa.me/${to}?text=${encodeURIComponent(message)}`,
       "_blank"
     );
   }
@@ -67,6 +80,7 @@ export default function CartDrawer() {
     setItems([]);
   }
 
+  // 📦 Pedido: recebe o objeto com todos os campos do modal
   function handleConfirmPedido(data: PedidoLeadData) {
     const productsText = items
       .map((item) => `- ${item.name} — R$ ${Number(item.price).toFixed(2)}`)
@@ -88,7 +102,8 @@ export default function CartDrawer() {
       `TOTAL: R$ ${total.toFixed(2)}\n\n` +
       `Por favor, me envie a CHAVE PIX para pagamento.`;
 
-    openWhatsApp(message);
+    // 📦 envia para o número de PEDIDOS (Brasil)
+    openWhatsApp(whatsappPedido, message);
 
     handleClear();
     setPedidoOpen(false);
@@ -99,17 +114,20 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  function handleConsultoriaSubmit(data: { name: string; phone: string; goal: string }) {
+  // 💬 Consultoria: envia para o número do Paraguai
+  function handleConsultoriaSubmit(data: ConsultoriaData) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
       `Telefone: ${data.phone}\n` +
       `Objetivo: ${data.goal}\n\n` +
       `Gostaria de uma consultoria antes de fazer meu pedido.`;
 
-    openWhatsApp(message);
+    // 💬 envia para o número de CONSULTORIA (Paraguai)
+    openWhatsApp(whatsappConsultoria, message);
     setConsultoriaOpen(false);
   }
 
+  // mantém o comportamento original: se carrinho vazio, não mostra o botão
   if (items.length === 0) return null;
 
   return (
@@ -151,7 +169,7 @@ export default function CartDrawer() {
               <div className="flex-1 space-y-4 overflow-auto">
                 {items.map((item, index) => (
                   <div
-                    key={index}
+                    key={`${item.name}-${index}`}
                     className="flex justify-between border-b border-white/10 pb-2"
                   >
                     <div>
