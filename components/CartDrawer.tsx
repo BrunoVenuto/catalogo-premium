@@ -22,9 +22,8 @@ export default function CartDrawer() {
   const [items, setItems] = useState<Product[]>([]);
   const router = useRouter();
 
-  // ✅ wa.me exige só dígitos
   const whatsappPedido = useMemo(
-    () => String(siteConfig.whatsappPedido || "").replace(/\D/g, ""),
+    () => String(siteConfig.whatsappPedido || siteConfig.whatsapp || "").replace(/\D/g, ""),
     []
   );
 
@@ -53,14 +52,8 @@ export default function CartDrawer() {
   }, [items]);
 
   function openWhatsApp(to: string, message: string) {
-    // Regra geral: número internacional completo, somente dígitos
     if (!to || to.length < 10) {
-      console.error(
-        "Número de WhatsApp inválido no config/site.ts. Use apenas dígitos (ex: 595976349138 ou 5521999999999)."
-      );
-      alert(
-        "Número do WhatsApp inválido no config/site.ts. Corrija para o formato internacional somente com dígitos."
-      );
+      alert("Número do WhatsApp inválido no config/site.ts (use somente dígitos).");
       return;
     }
 
@@ -72,7 +65,7 @@ export default function CartDrawer() {
 
   function handleRemove(index: number) {
     removeFromCart(index);
-    setItems(getCart()); // atualiza imediatamente
+    setItems(getCart());
   }
 
   function handleClear() {
@@ -80,12 +73,13 @@ export default function CartDrawer() {
     setItems([]);
   }
 
-  // 📦 Pedido: recebe o objeto com todos os campos do modal
+  // ✅ Pedido: recebe todos os campos do modal
   function handleConfirmPedido(data: PedidoLeadData) {
     const productsText = items
       .map((item) => `- ${item.name} — R$ ${Number(item.price).toFixed(2)}`)
       .join("\n");
 
+    // ✅ Sem a frase "COPIE ESSA MENSAGEM E EDITE"
     const message =
       `NOVO PEDIDO\n\n` +
       `DADOS DO CLIENTE\n` +
@@ -102,7 +96,6 @@ export default function CartDrawer() {
       `TOTAL: R$ ${total.toFixed(2)}\n\n` +
       `Por favor, me envie a CHAVE PIX para pagamento.`;
 
-    // 📦 envia para o número de PEDIDOS (Brasil)
     openWhatsApp(whatsappPedido, message);
 
     handleClear();
@@ -114,7 +107,6 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  // 💬 Consultoria: envia para o número do Paraguai
   function handleConsultoriaSubmit(data: ConsultoriaData) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
@@ -122,12 +114,10 @@ export default function CartDrawer() {
       `Objetivo: ${data.goal}\n\n` +
       `Gostaria de uma consultoria antes de fazer meu pedido.`;
 
-    // 💬 envia para o número de CONSULTORIA (Paraguai)
     openWhatsApp(whatsappConsultoria, message);
     setConsultoriaOpen(false);
   }
 
-  // mantém o comportamento original: se carrinho vazio, não mostra o botão
   if (items.length === 0) return null;
 
   return (
