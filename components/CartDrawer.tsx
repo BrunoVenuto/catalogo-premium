@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { getCart, clearCart, removeFromCart } from "@/lib/cart";
 import LeadModalPedido from "./LeadModalPedido";
@@ -15,6 +15,11 @@ export default function CartDrawer() {
   const [consultoriaOpen, setConsultoriaOpen] = useState(false);
   const [items, setItems] = useState<Product[]>([]);
   const router = useRouter();
+
+  // ✅ Sempre usar só dígitos no wa.me (evita erro de número inválido)
+  const whatsappTo = useMemo(() => {
+    return String(siteConfig.whatsapp || "").replace(/\D/g, "");
+  }, []);
 
   useEffect(() => {
     function update() {
@@ -31,7 +36,38 @@ export default function CartDrawer() {
     };
   }, []);
 
-  const total = items.reduce((sum, item) => sum + Number(item.price), 0);
+  const total = useMemo(() => {
+    return items.reduce((sum, item) => sum + Number(item.price), 0);
+  }, [items]);
+
+  function openWhatsApp(message: string) {
+    // Regra prática: BR completo costuma ter 12 ou 13 dígitos (55 + DDD + número)
+    if (!whatsappTo || whatsappTo.length < 12) {
+      console.error(
+        "Número do WhatsApp inválido em siteConfig.whatsapp. Use apenas dígitos no formato 55DDDNUMERO. Ex: 5531999999999"
+      );
+      alert(
+        "Número do WhatsApp está inválido no site. Corrija em config/site.ts (formato: 55DDDNUMERO)."
+      );
+      return;
+    }
+
+    window.open(
+      `https://wa.me/${whatsappTo}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  }
+
+  function handleRemove(index: number) {
+    removeFromCart(index);
+    // ✅ Atualiza o estado imediatamente (não depende do evento)
+    setItems(getCart());
+  }
+
+  function handleClear() {
+    clearCart();
+    setItems([]);
+  }
 
   // ✅ AGORA RECEBE: nome, cidade, whatsapp com DDD
   function handleConfirmPedido(name: string, city: string, phone: string) {
@@ -48,12 +84,9 @@ export default function CartDrawer() {
       `Total: R$ ${total.toFixed(2)}\n\n` +
       `Por favor, me envie a chave PIX para pagamento.`;
 
-    window.open(
-      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
+    openWhatsApp(message);
 
-    clearCart();
+    handleClear();
     setPedidoOpen(false);
     setOpen(false);
 
@@ -62,18 +95,18 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  function handleConsultoriaSubmit(data: { name: string; phone: string; goal: string }) {
+  function handleConsultoriaSubmit(data: {
+    name: string;
+    phone: string;
+    goal: string;
+  }) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
       `Telefone: ${data.phone}\n` +
       `Objetivo: ${data.goal}\n\n` +
       `Gostaria de uma consultoria antes de fazer meu pedido.`;
 
-    window.open(
-      `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-
+    openWhatsApp(message);
     setConsultoriaOpen(false);
   }
 
@@ -128,7 +161,10 @@ export default function CartDrawer() {
                         R$ {Number(item.price).toFixed(2)}
                       </p>
                     </div>
-                    <button onClick={() => removeFromCart(index)} className="text-red-500">
+                    <button
+                      onClick={() => handleRemove(index)}
+                      className="text-red-500"
+                    >
                       ✕
                     </button>
                   </div>
@@ -138,7 +174,9 @@ export default function CartDrawer() {
               <div className="mt-6 border-t border-white/10 pt-4 space-y-4">
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-green-400">R$ {total.toFixed(2)}</span>
+                  <span className="text-green-400">
+                    R$ {total.toFixed(2)}
+                  </span>
                 </div>
 
                 <button
@@ -153,6 +191,13 @@ export default function CartDrawer() {
                   className="w-full bg-yellow-400 py-3 rounded-lg font-bold text-black"
                 >
                   💬 Solicitar consultoria
+                </button>
+
+                <button
+                  onClick={handleClear}
+                  className="w-full border border-white/20 py-3 rounded-lg font-bold"
+                >
+                  Limpar carrinho
                 </button>
               </div>
             </motion.div>
