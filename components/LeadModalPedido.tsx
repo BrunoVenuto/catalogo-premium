@@ -6,15 +6,13 @@ import { useState } from "react";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onConfirm: (name: string) => void;
+  onConfirm: (name: string, city: string, phone: string) => void;
 };
 
-export default function LeadModalPedido({
-  open,
-  onClose,
-  onConfirm,
-}: Props) {
+export default function LeadModalPedido({ open, onClose, onConfirm }: Props) {
   const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [phone, setPhone] = useState("");
 
   function handleNameChange(value: string) {
     // aceita apenas letras, espaços e acentos
@@ -22,12 +20,33 @@ export default function LeadModalPedido({
     setName(sanitized);
   }
 
+  function handleCityChange(value: string) {
+    // cidade: letras, espaços, acentos, hífen (ex: Rio de Janeiro, Belo-Horizonte)
+    const sanitized = value.replace(/[^a-zA-ZÀ-ÿ\s-]/g, "");
+    setCity(sanitized);
+  }
+
+  function handlePhoneChange(value: string) {
+    // mantém só dígitos (DDD + número)
+    const digitsOnly = value.replace(/\D/g, "");
+    setPhone(digitsOnly);
+  }
+
   function handleConfirm() {
     const finalName = name.trim();
-    if (!finalName) return;
+    const finalCity = city.trim();
+    const finalPhone = phone.trim();
 
-    onConfirm(finalName);
+    // validações simples (DDD+cel normalmente 10 ou 11 dígitos no BR)
+    if (!finalName) return;
+    if (!finalCity) return;
+    if (finalPhone.length < 10) return;
+
+    onConfirm(finalName, finalCity, finalPhone);
+
     setName("");
+    setCity("");
+    setPhone("");
   }
 
   return (
@@ -47,13 +66,10 @@ export default function LeadModalPedido({
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-4">
-              Antes de enviar o pedido
-            </h2>
+            <h2 className="text-xl font-bold mb-4">Antes de enviar o pedido</h2>
 
             <p className="text-neutral-300 mb-4 text-sm">
-              Informe seu nome para identificação.
-              O pagamento será feito via <strong>PIX</strong>.
+              Preencha seus dados para identificação e cálculo de frete/entrega.
             </p>
 
             <input
@@ -62,6 +78,24 @@ export default function LeadModalPedido({
               placeholder="Seu nome"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
+              className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
+            />
+
+            <input
+              type="text"
+              inputMode="text"
+              placeholder="Sua cidade (ex: Belo Horizonte)"
+              value={city}
+              onChange={(e) => handleCityChange(e.target.value)}
+              className="w-full mb-3 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
+            />
+
+            <input
+              type="tel"
+              inputMode="tel"
+              placeholder="Seu WhatsApp com DDD (ex: 31999999999)"
+              value={phone}
+              onChange={(e) => handlePhoneChange(e.target.value)}
               className="w-full mb-4 bg-black border border-white/20 rounded-lg px-4 py-3 text-white placeholder-neutral-400 focus:outline-none focus:border-green-500"
             />
 
@@ -80,6 +114,10 @@ export default function LeadModalPedido({
                 Enviar pedido
               </button>
             </div>
+
+            <p className="text-xs text-neutral-400 mt-3">
+              *O telefone será usado apenas para facilitar o contato/entrega.
+            </p>
           </motion.div>
         </motion.div>
       )}

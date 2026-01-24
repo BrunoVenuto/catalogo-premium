@@ -20,26 +20,33 @@ export default function CartDrawer() {
     function update() {
       setItems(getCart());
     }
+
     update();
     window.addEventListener("cart:update", update);
-    return () => window.removeEventListener("cart:update", update);
+    window.addEventListener("cart:add", update);
+
+    return () => {
+      window.removeEventListener("cart:update", update);
+      window.removeEventListener("cart:add", update);
+    };
   }, []);
 
-  const total = items.reduce(
-    (sum, item) => sum + Number(item.price),
-    0
-  );
+  const total = items.reduce((sum, item) => sum + Number(item.price), 0);
 
-  function handleConfirmPedido(name: string) {
+  // ✅ AGORA RECEBE: nome, cidade, whatsapp com DDD
+  function handleConfirmPedido(name: string, city: string, phone: string) {
+    const productsText = items
+      .map((item) => `• ${item.name} — R$ ${Number(item.price).toFixed(2)}`)
+      .join("\n");
+
     const message =
-      `Olá, meu nome é ${name}.\n\n` +
-      items
-        .map(
-          (item) =>
-            `• ${item.name} — R$ ${Number(item.price).toFixed(2)}`
-        )
-        .join("\n") +
-      `\n\nTotal: R$ ${total.toFixed(2)}`;
+      `NOVO PEDIDO\n\n` +
+      `Nome do cliente: ${name}\n` +
+      `Cidade: ${city}\n` +
+      `WhatsApp (DDD): ${phone}\n\n` +
+      `Produtos:\n${productsText}\n\n` +
+      `Total: R$ ${total.toFixed(2)}\n\n` +
+      `Por favor, me envie a chave PIX para pagamento.`;
 
     window.open(
       `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(message)}`,
@@ -55,11 +62,7 @@ export default function CartDrawer() {
     }, 300);
   }
 
-  function handleConsultoriaSubmit(data: {
-    name: string;
-    phone: string;
-    goal: string;
-  }) {
+  function handleConsultoriaSubmit(data: { name: string; phone: string; goal: string }) {
     const message =
       `Olá, meu nome é ${data.name}.\n` +
       `Telefone: ${data.phone}\n` +
@@ -74,6 +77,7 @@ export default function CartDrawer() {
     setConsultoriaOpen(false);
   }
 
+  // mantém o comportamento original: se carrinho vazio, não mostra o botão
   if (items.length === 0) return null;
 
   return (
@@ -124,10 +128,7 @@ export default function CartDrawer() {
                         R$ {Number(item.price).toFixed(2)}
                       </p>
                     </div>
-                    <button
-                      onClick={() => removeFromCart(index)}
-                      className="text-red-500"
-                    >
+                    <button onClick={() => removeFromCart(index)} className="text-red-500">
                       ✕
                     </button>
                   </div>
@@ -137,9 +138,7 @@ export default function CartDrawer() {
               <div className="mt-6 border-t border-white/10 pt-4 space-y-4">
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
-                  <span className="text-green-400">
-                    R$ {total.toFixed(2)}
-                  </span>
+                  <span className="text-green-400">R$ {total.toFixed(2)}</span>
                 </div>
 
                 <button

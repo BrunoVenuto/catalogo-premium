@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Strong Suplementos",
 
-  whatsapp: "5531999266564",
+  whatsapp: "5521999266564",
 
   whatsappMessage: "Olá! Eu vim do seu site e gostaria de fazer um pedido com os seguintes itens:",
   consultoriaMessage: "Olá, preciso de uma consultoria antes de fazer meu pedido.",
