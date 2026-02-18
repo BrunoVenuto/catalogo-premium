@@ -1,16 +1,16 @@
 export const siteConfig = {
-  name: "Catálogo Premium",
+  name: "Strong Suplementos",
 
   // 📦 Número para RECEBER PEDIDOS (somente dígitos: 55 + DDD + número)
-  whatsappPedido: "553195453632", // <-- troque pelo SEU número real de pedidos
+  whatsappPedido: "5521999226564", // <-- troque pelo SEU número real de pedidos
 
   // 💬 Número para CONSULTORIA
   // wa.me exige somente dígitos:
-  whatsappConsultoria: "31995453632",
+  whatsappConsultoria: "595976349138",
 
   // ✅ compatibilidade: se algum lugar do projeto ainda usa siteConfig.whatsapp
   // apontamos para o número de PEDIDOS
-  whatsapp: "5531995453632",
+  whatsapp: "5521999226564",
 
   whatsappMessage:
     "Olá! Eu vim do seu site e gostaria de fazer um pedido com os seguintes itens:",
